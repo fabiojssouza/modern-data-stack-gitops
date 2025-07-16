@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: data-stack
+ labels:
+ name: data-stack
+ app.kubernetes.io/name: data-stack
+ app.kubernetes.io/managed-by: argocd

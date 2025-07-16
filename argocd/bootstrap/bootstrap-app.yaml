@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+ name: bootstrap
+ namespace: argocd
+spec:
+ project: data-stack
+ source:
+ repoURL: https://github.com/SEU_USUARIO/modern-data-stack-gitops
+ targetRevision: HEAD
+ path: argocd/applications
+ destination:
+ server: https://kubernetes.default.svc
+ namespace: argocd
+ syncPolicy:
+ automated:
+ prune: true
+ selfHeal: true
+ syncOptions:
+ - CreateNamespace=true

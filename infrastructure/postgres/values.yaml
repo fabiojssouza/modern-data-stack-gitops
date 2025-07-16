@@ -1,0 +1,28 @@
+global:
+ postgresql:
+ auth:
+ postgresPassword: "postgres123"
+ database: "datastack"
+ username: "datastack"
+ password: "datastack123"
+primary:
+ persistence:
+ enabled: true
+ size: 50Gi
+ storageClass: "local-path"
+ 
+ resources:
+ limits:
+ memory: 4Gi
+ cpu: 2
+ requests:
+ memory: 2Gi
+ cpu: 1
+ service:
+ type: ClusterIP
+ ports:
+ postgresql: 5432
+metrics:
+ enabled: true
+ serviceMonitor:
+ enabled: false

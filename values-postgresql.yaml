@@ -1,0 +1,54 @@
+auth:
+  enablePostgresUser: true
+  postgresPassword: "postgres123"
+  username: "datastack"
+  password: "datastack123"
+  database: "datastack"
+
+primary:
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "local-path"
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  initdb:
+    scripts:
+      init-databases.sql: |
+        CREATE DATABASE airbyte_db;
+        CREATE DATABASE prefect_db;
+        CREATE DATABASE openmetadata_db;
+        CREATE DATABASE superset_db;
+        CREATE DATABASE hive_metastore_db;
+
+        CREATE USER airbyte_user WITH PASSWORD 'airbyte123';
+        CREATE USER prefect_user WITH PASSWORD 'prefect123';
+        CREATE USER openmetadata_user WITH PASSWORD 'openmetadata123';
+        CREATE USER superset_user WITH PASSWORD 'superset123';
+        CREATE USER hive_user WITH PASSWORD 'hive123';
+
+        GRANT ALL PRIVILEGES ON DATABASE airbyte_db TO airbyte_user;
+        GRANT ALL PRIVILEGES ON DATABASE prefect_db TO prefect_user;
+        GRANT ALL PRIVILEGES ON DATABASE openmetadata_db TO openmetadata_user;
+        GRANT ALL PRIVILEGES ON DATABASE superset_db TO superset_user;
+        GRANT ALL PRIVILEGES ON DATABASE hive_metastore_db TO hive_user;
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+volumePermissions:
+  enabled: true
+
+service:
+  type: ClusterIP
+  ports:
+    postgresql: 5432

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+ name: minio
+ namespace: argocd
+spec:
+ project: data-stack
+ source:
+ repoURL: https://charts.bitnami.com/bitnami
+ chart: minio
+ targetRevision: 12.6.4
+ helm:
+ valueFiles:
+ - values.yaml
+ destination:
+ server: https://kubernetes.default.svc
+ namespace: data-stack
+ syncPolicy:
+ automated:
+ prune: true
+ selfHeal: true
+ syncOptions:
+ - CreateNamespace=true

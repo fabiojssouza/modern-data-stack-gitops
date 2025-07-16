@@ -1,0 +1,48 @@
+mode: standalone
+auth:
+ rootUser: "admin"
+ rootPassword: "minio123"
+defaultBuckets: "warehouse,airbyte,prefect,dbt,superset"
+persistence:
+ enabled: true
+ size: 200Gi
+ storageClass: "local-path"
+resources:
+ limits:
+ memory: 4Gi
+ cpu: 2
+ requests:
+ memory: 2Gi
+ cpu: 1
+service:
+ type: ClusterIP
+ ports:
+ api: 9000
+ console: 9001
+ingress:
+ enabled: true
+ ingressClassName: nginx
+ annotations:
+ cert-manager.io/cluster-issuer: letsencrypt-prod
+ nginx.ingress.kubernetes.io/ssl-redirect: "true"
+ hostname: minio.kube.dev.dissertio.com.br
+ tls: true
+ extraTls:
+ - hosts:
+ - minio.kube.dev.dissertio.com.br
+ secretName: minio-tls
+consoleIngress:
+ enabled: true
+ ingressClassName: nginx
+ annotations:
+ cert-manager.io/cluster-issuer: letsencrypt-prod
+ nginx.ingress.kubernetes.io/ssl-redirect: "true"
+ hostname: minio-console.seudominio.com
+ tls: true
+ extraTls:
+ - hosts:
+ - minio-console.seudominio.com
+ secretName: minio-console-tls
+metrics:
+ serviceMonitor:
+ enabled: false

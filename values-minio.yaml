@@ -1,0 +1,61 @@
+auth:
+  rootUser: "minioadmin"
+  rootPassword: "minioadmin123"
+
+mode: standalone
+
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: "local-path"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+service:
+  type: ClusterIP
+  ports:
+    api: 9000
+    console: 9001
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hostname: minio.seudominio.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      client_max_body_size 0;
+#    tls: true
+consoleIngress:
+  enabled: true
+  ingressClassName: nginx
+  hostname: minio-console.seudominio.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+#  tls: true
+
+defaultBuckets: "lakehouse,airbyte,prefect,dbt"
+
+policies:
+  - name: lakehouse-policy
+    statements:
+      - effect: Allow
+        actions:
+          - "s3:GetObject"
+          - "s3:PutObject"
+          - "s3:DeleteObject"
+          - "s3:ListBucket"
+        resources:
+          - "arn:aws:s3:::lakehouse/*"
+          - "arn:aws:s3:::lakehouse"

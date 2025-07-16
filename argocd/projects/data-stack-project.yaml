@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+ name: data-stack
+ namespace: argocd
+spec:
+ description: Modern Data Stack Project
+ sourceRepos:
+ - 'https://github.com/fabiojssouza/modern-data-stack-gitops'
+ destinations:
+ - namespace: '*'
+ server: https://kubernetes.default.svc
+ clusterResourceWhitelist:
+ - group: ''
+ kind: Namespace
+ - group: ''
+ kind: PersistentVolume
+ - group: storage.k8s.io
+ kind: StorageClass
+ - group: networking.k8s.io
+ kind: Ingress
+ - group: cert-manager.io
+ kind: ClusterIssuer
+ namespaceResourceWhitelist:
+ - group: ''
+ kind: ConfigMap
+ - group: ''
+ kind: Secret
+ - group: ''
+ kind: Service
+ - group: ''
+ kind: PersistentVolumeClaim
+ - group: apps
+ kind: Deployment
+ - group: apps
+ kind: StatefulSet
+ - group: batch
+ kind: Job
+ - group: batch
+ kind: CronJob
+ roles:
+ - name: admin
+ description: Admin role
+ policies:
+ - p, proj:data-stack:admin, applications, *, data-stack/*, allow
+ - p, proj:data-stack:admin, repositories, *, *, allow
+ groups:
+ - data-stack-admins
+ syncWindows:
+ - kind: allow
+ schedule: '* * * * *'
+ duration: 1h
+ applications:
+ - '*'
+ manualSync: true

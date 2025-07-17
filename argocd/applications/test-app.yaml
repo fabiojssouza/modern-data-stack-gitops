@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
     targetRevision: develop
-    path: infrastructure/postgresql
+    path: infrastructure/postgres
   destination:
     server: https://kubernetes.default.svc
     namespace: data-stack

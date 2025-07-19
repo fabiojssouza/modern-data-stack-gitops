@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: data-stack
+  namespace: argocd
+spec:
+  description: Modern Data Stack Project
+  sourceRepos:
+  - 'https://github.com/fabiojssouza/modern-data-stack-gitops'
+  destinations:
+  - namespace: data-stack
+    server: https://kubernetes.default.svc
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: ''
+    kind: PersistentVolume
+  - group: storage.k8s.io
+    kind: StorageClass
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: '*'
+  - group: apps
+    kind: '*'
+  - group: extensions
+    kind: '*'
+  - group: networking.k8s.io
+    kind: '*'
+  roles:
+  - name: admin
+    policies:
+    - p, proj:data-stack:admin, applications, *, data-stack/*, allow
+    - p, proj:data-stack:admin, repositories, *, *, allow
+    groups:
+    - argocd-admins

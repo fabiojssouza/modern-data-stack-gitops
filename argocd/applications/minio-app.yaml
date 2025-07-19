@@ -10,7 +10,7 @@ spec:
     targetRevision: develop
     path: infrastructure/minio
     chart: minio
-    targetRevision: 12.6.4
+    targetRevision: develop
     helm:
       valueFiles:
         - values.yaml

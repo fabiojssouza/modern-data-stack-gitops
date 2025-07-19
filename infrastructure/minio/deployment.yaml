@@ -83,9 +83,9 @@ spec:
   tls:
     - secretName: minio-tls
       hosts:
-        - minio.seudominio.com
+        - minio.kube.dev.dissertio.com.br
   rules:
-    - host: minio.seudominio.com
+    - host: minio.kube.dev.dissertio.com.br
       http:
         paths:
           - path: /

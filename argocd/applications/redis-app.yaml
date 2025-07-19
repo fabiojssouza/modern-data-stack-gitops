@@ -1,23 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
- name: redis
- namespace: argocd
+  name: redis
+  namespace: argocd
 spec:
- project: data-stack
- source:
- repoURL: https://charts.bitnami.com/bitnami
- chart: redis
- targetRevision: 17.11.3
- helm:
- valueFiles:
- - values.yaml
- destination:
- server: https://kubernetes.default.svc
- namespace: data-stack
- syncPolicy:
- automated:
- prune: true
- selfHeal: true
- syncOptions:
- - CreateNamespace=true
+  project: data-stack
+  source:
+    repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
+    targetRevision: develop
+    path: infrastructure/redis
+
+#    repoURL: https://charts.bitnami.com/bitnami
+#    chart: redis
+#    targetRevision: 17.11.3
+#    helm:
+#      valueFiles:
+#        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

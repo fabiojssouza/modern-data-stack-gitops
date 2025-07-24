@@ -1,0 +1,84 @@
+global:
+  airbyte:
+    workspace:
+      volume:
+        # Tamanho do volume persistente usado para o workspace do Airbyte
+        size: 10Gi
+
+postgres:
+  enabled: true
+  postgresqlUsername: airbyte
+  postgresqlPassword: airbyte123
+  postgresqlDatabase: airbyte
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: "local-path"  # ou outra StorageClass do seu cluster
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+minio:
+  enabled: true
+  auth:
+    rootUser: airbyte
+    rootPassword: airbyte123
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: "local-path"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+webapp:
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+
+server:
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+worker:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+temporal:
+  enabled: true
+  postgresql:
+    enabled: true
+    postgresqlPassword: temporal123
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: "local-path"
+
+ingress:
+  enabled: false

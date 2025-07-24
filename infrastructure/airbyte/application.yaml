@@ -1,20 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: data-stack-infrastructure
+  name: airbyte
   namespace: argocd
 spec:
   project: data-stack
   source:
-    repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
-    targetRevision: develop
-    path: infrastructure/airbyte
+    repoURL: https://airbytehq.github.io/helm-charts
+    chart: airbyte
+    targetRevision: 1.7.0
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: data-stack
   syncPolicy:
     automated:
-      prune: true
       selfHeal: true
+      prune: true
     syncOptions:
     - CreateNamespace=true

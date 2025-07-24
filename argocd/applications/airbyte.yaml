@@ -1,21 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: postgresql
+  name: airbyte
   namespace: argocd
 spec:
   project: data-stack
   source:
     repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
     targetRevision: develop
-    path: infrastructure/postgres
-
-#    repoURL: https://charts.bitnami.com/bitnami
-#    chart: postgresql
-#    targetRevision: 12.6.2
-#    helm:
-#      valueFiles:
-#        - values.yaml
+    path: applications/airbyte
   destination:
     server: https://kubernetes.default.svc
     namespace: data-stack
@@ -23,5 +16,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true

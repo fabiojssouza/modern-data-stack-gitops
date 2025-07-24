@@ -1,0 +1,197 @@
+# ARQUIVO: airbyte-deployment.yaml
+
+# ===================================================================
+# 1. Namespace onde tudo será criado
+# ===================================================================
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: data-stack
+
+---
+# ===================================================================
+# 2. Volumes persistentes para armazenar dados
+# ===================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airbyte-db-pvc
+  namespace: data-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airbyte-workspace-pvc
+  namespace: data-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# ===================================================================
+# 3. Deployment para o Banco de Dados (PostgreSQL)
+# ===================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-db
+  namespace: data-stack
+  labels:
+    app: airbyte-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airbyte-db
+  template:
+    metadata:
+      labels:
+        app: airbyte-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "airbyte"
+            - name: POSTGRES_USER
+              value: "airbyte"
+            - name: POSTGRES_PASSWORD
+              value: "password" # Use um Secret em produção!
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: airbyte-db-pvc
+
+---
+# ===================================================================
+# 4. Service para o Banco de Dados
+# ===================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: airbyte-db-svc
+  namespace: data-stack
+spec:
+  selector:
+    app: airbyte-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
+---
+# ===================================================================
+# 5. Deployment principal do Airbyte
+# ===================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte # Metadata solicitada
+  namespace: data-stack # Metadata solicitada
+  labels:
+    app: airbyte
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airbyte
+  template:
+    metadata:
+      labels:
+        app: airbyte
+    spec:
+      containers:
+        - name: airbyte-webapp
+          image: airbyte/webapp:1.6.4
+          ports:
+            - containerPort: 80
+          env:
+            - name: AIRBYTE_SERVER_HOST
+              value: "airbyte.kube.dev.dissertio.com.br"
+            - name: AIRBYTE_SERVER_PORT
+              value: "8001"
+            - name: CONNECTOR_BUILDER_API_HOST
+              value: "airbyte.kube.dev.dissertio.com.br"
+            - name: CONNECTOR_BUILDER_API_PORT
+              value: "8001"
+            - name: AUTH_PROVIDER_TYPE
+              value: "instance"
+        - name: airbyte-server
+          image: airbyte/server:1.6.4
+          ports:
+            - containerPort: 8001
+          env:
+            - name: AIRBYTE_VERSION
+              value: "latest"
+            - name: WORKSPACE_ROOT
+              value: "/workspace"
+            - name: DATABASE_USER
+              value: "airbyte"
+            - name: DATABASE_PASSWORD
+              value: "password" # Use um Secret em produção!
+            - name: DATABASE_HOST
+              value: "airbyte-db-svc"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_DB
+              value: "airbyte"
+          volumeMounts:
+            - name: workspace-storage
+              mountPath: /workspace
+        - name: airbyte-worker
+          image: airbyte/worker:latest
+          env:
+            - name: AIRBYTE_VERSION
+              value: "latest"
+            - name: WORKSPACE_ROOT
+              value: "/workspace"
+            - name: DATABASE_USER
+              value: "airbyte"
+            - name: DATABASE_PASSWORD
+              value: "password" # Use um Secret em produção!
+            - name: DATABASE_HOST
+              value: "airbyte-db-svc"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_DB
+              value: "airbyte"
+          volumeMounts:
+            - name: workspace-storage
+              mountPath: /workspace
+      volumes:
+        - name: workspace-storage
+          persistentVolumeClaim:
+            claimName: airbyte-workspace-pvc
+
+---
+# ===================================================================
+# 6. Service para expor a interface web do Airbyte
+# ===================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: airbyte-ui
+  namespace: data-stack
+spec:
+  type: LoadBalancer # Use NodePort ou Ingress em cenários diferentes
+  selector:
+    app: airbyte
+  ports:
+    - protocol: TCP
+      port: 6780 # Porta de acesso externo
+      targetPort: 80 # Porta do container airbyte-webapp

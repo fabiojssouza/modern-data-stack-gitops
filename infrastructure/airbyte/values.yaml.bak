@@ -1,0 +1,33 @@
+# ARQUIVO: values.yaml
+# Exemplo de configuração para instalar o Airbyte v1.6.4 com armazenamento local.
+
+# Versão exata do Airbyte que queremos instalar.
+airbyteVersion: "1.6.4"
+
+# Configurações para a interface web (WebApp).
+webapp:
+  # Define o tipo de Serviço Kubernetes para expor a UI.
+  # LoadBalancer é ideal para que seja acessível de fora do cluster.
+  service:
+    type: LoadBalancer
+
+# Configurações de autenticação.
+# "instance" desabilita a dependência do Keycloak que causou o erro.
+auth:
+  provider:
+    type: "instance"
+
+# Configuração global de armazenamento.
+# Usamos o StorageClass 'local-path' que criamos para o K3s.
+global:
+  storage:
+    local:
+      storageClass: "local-path"
+
+# Configurações para o banco de dados PostgreSQL interno.
+postgresql:
+  # Garante que o banco de dados use armazenamento persistente.
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    size: 10Gi

@@ -1,19 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio
+  name: data-stack-infrastructure
   namespace: argocd
 spec:
   project: data-stack
   source:
-    repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
-    targetRevision: develop
-    path: infrastructure/minio
-#    chart: minio
-#    targetRevision: develop
-#    helm:
-#      valueFiles:
-#        - values.yaml
+    repoURL: https://github.com/seu-usuario/modern-data-stack-gitops
+    targetRevision: main
+    path: infrastructure
   destination:
     server: https://kubernetes.default.svc
     namespace: data-stack
@@ -22,4 +17,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

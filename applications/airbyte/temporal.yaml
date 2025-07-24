@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-temporal
+  namespace: data-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airbyte-temporal
+  template:
+    metadata:
+      labels:
+        app: airbyte-temporal
+    spec:
+      containers:
+      - name: airbyte-temporal
+        image: temporalio/auto-setup:1.20.0
+        ports:
+        - containerPort: 7233
+        env:
+        - name: DB
+          value: "postgresql"
+        - name: DB_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          value: "leads_user"
+        - name: POSTGRES_PWD
+          value: "leads_password_123"
+        - name: POSTGRES_SEEDS
+          value: "postgresql"
+        - name: DYNAMIC_CONFIG_FILE_PATH
+          value: "config/dynamicconfig/development.yaml"
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airbyte-temporal
+  namespace: data-stack
+spec:
+  selector:
+    app: airbyte-temporal
+  ports:
+    - port: 7233
+      targetPort: 7233
+  type: ClusterIP

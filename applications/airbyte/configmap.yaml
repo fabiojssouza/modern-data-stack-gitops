@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airbyte-config
+  namespace: data-stack
+data:
+  AIRBYTE_VERSION: "0.50.33"
+  DATABASE_HOST: "postgresql"
+  DATABASE_PORT: "5432"
+  DATABASE_DB: "leads_db"
+  DATABASE_USER: "leads_user"
+  STATE_STORAGE_MINIO_ENDPOINT: "http://minio:9000"
+  STATE_STORAGE_MINIO_ACCESS_KEY: "admin"
+  STATE_STORAGE_MINIO_SECRET_KEY: "minio123"
+  STATE_STORAGE_MINIO_BUCKET: "airbyte"
+  WORKER_ENVIRONMENT: "kubernetes"
+  LOG_LEVEL: "INFO"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airbyte-secrets
+  namespace: data-stack
+type: Opaque
+data:
+  DATABASE_PASSWORD: bGVhZHNfcGFzc3dvcmRfMTIz  # leads_password_123
+  MINIO_ACCESS_KEY: YWRtaW4=  # admin
+  MINIO_SECRET_KEY: bWluaW8xMjM=  # minio123

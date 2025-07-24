@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airbyte
+  namespace: argocd
+spec:
+  project: data-stack
+  source:
+    repoURL: https://github.com/fabiojssouza/modern-data-stack-gitops
+    targetRevision: develop
+    path: applications/airbyte
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: data-stack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

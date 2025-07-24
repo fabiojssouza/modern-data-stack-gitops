@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-worker
+  namespace: data-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airbyte-worker
+  template:
+    metadata:
+      labels:
+        app: airbyte-worker
+    spec:
+      serviceAccountName: airbyte-admin
+      containers:
+      - name: airbyte-worker
+        image: airbyte/worker:0.50.33
+        envFrom:
+        - configMapRef:
+            name: airbyte-config
+        - secretRef:
+            name: airbyte-secrets
+        env:
+        - name: TEMPORAL_HOST
+          value: "airbyte-temporal"
+        - name: S3_LOG_BUCKET
+          value: "airbyte"
+        - name: S3_LOG_BUCKET_REGION
+          value: "us-east-1"
+        - name: S3_MINIO_ENDPOINT
+          value: "http://minio:9000"
+        - name: USE_MINIO
+          value: "true"
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: airbyte-volume-configs
+          mountPath: /configs
+        - name: airbyte-volume-workspace
+          mountPath: /tmp/workspace
+      volumes:
+      - name: airbyte-volume-configs
+        emptyDir: {}
+      - name: airbyte-volume-workspace
+        emptyDir: {}
